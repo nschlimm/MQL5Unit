@@ -4,48 +4,42 @@
 //|                             https://github.com/nschlimm/MQL5Unit |
 //+------------------------------------------------------------------+
 #property copyright "Copyright 2021, Niklas Schlimm"
-#property link      "https://github.com/nschlimm/MQL5Unit"
 #property version   "1.00"
 
-//+------------------------------------------------------------------+
-//| Inclusions
-//+------------------------------------------------------------------+
-
-#include "MQLUnitTestAsserts.mqh"
-#include "MQLUnitTestSuite.mqh"
-
-datetime candleOpenTime;
-int candleCounter = 0;
-
-CUnitTestSuite* m_testSuite;
+#include <MqlUnit/MQLUnitTestLibrary.mqh>
 
 //+------------------------------------------------------------------+
-//|                                                                  |
+//| Simple test example on moving average indicator
 //+------------------------------------------------------------------+
-void IncremetCandleCounter()
+CUnitTestSuite* ComposeTestsuite()
   {
-   datetime candleOpenTimeCheck = iTime(_Symbol, PERIOD_CURRENT,0);
-   if(candleOpenTime!=candleOpenTimeCheck)
-     {
-      //Print("new candle at: " + candleOpenTimeCheck);
-      candleOpenTime = candleOpenTimeCheck;
-      candleCounter++;
-     }
+   CUnitTestSuite* testSuite = new CUnitTestSuite();
+   testSuite.AddSetupFunction(1, Test_Indicators_copyBuffer_setup);
+   testSuite.AddUnitTestFunction(2,Test_Indicators_copyBuffer);
+   return testSuite;
   }
 
 //+------------------------------------------------------------------+
-//|                                                                  |
+//| Setup method to initialize indicator
 //+------------------------------------------------------------------+
-void OnTick()
+void Test_Indicators_copyBuffer_setup()
   {
-
-   IncremetCandleCounter();
-   m_testSuite.ExecuteSetup(candleCounter);
-   m_testSuite.ExecuteNewCandleTests(candleCounter);
-
+// initialize indicator
+   int handle=iMA(_Symbol, PERIOD_CURRENT,10,0,MODE_SMA,PRICE_CLOSE);
   }
 
-void OnInit() {
-   m_testSuite = ComposeTestsuite();
-}
+//+------------------------------------------------------------------+
+//| Test on indicator
+//+------------------------------------------------------------------+
+CUnitTestAsserts* Test_Indicators_copyBuffer()
+  {
+   CUnitTestAsserts* ut = new CUnitTestAsserts("Test_Indicators_copyBuffer");
+   double movingAverageData[];
+   int handle=iMA(_Symbol, PERIOD_CURRENT,10,0,MODE_SMA,PRICE_CLOSE);
+   CopyBuffer(handle,0,1,10,movingAverageData);
+// check if data is copied to local array
+   ut.IsTrue(__FILE__, __LINE__, movingAverageData[0] > 0);
+   return ut;
+  }
+
 //+------------------------------------------------------------------+

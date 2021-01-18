@@ -11,7 +11,7 @@
 #include <Arrays\List.mqh>
 #include "MQLUnitTestAsserts.mqh"
 
-enum TEST_EXECUTION_STATUS
+enum ENUM_TEST_EXEC_STATE
   {
    PENDING,
    EXECUTED
@@ -38,25 +38,24 @@ private:
    int               m_SetupExecuteOnCandleCount[][2]; // holds canlde count on which to setup function and execution status
 
    void              DisplayResults();
-   bool              canFinish(int currentCandleCount);
-   void              finishUnitTestCollection();
-   bool              notEmpty();
+   bool              CanFinish(int currentCandleCount);
+   void              FinishUnitTestsuite();
+   bool              NotEmpty();
 public:
    void              AddUnitTestAsserts(CUnitTestAsserts* ut); // result of old school unit test function
    void              AddUnitTestFunction(UnitTest testFunc); // new school test added
    void              AddUnitTestFunction(int onCandleCount, UnitTest testFunc); // new school add on tick test
    void              AddSetupFunction(int onCandleCount, Setup setup); // new school on tick test with setup
-   void              executeOnInitTests();
-   void              executeOnNewCandleTests(int currentCandleCount);
-   void              executeSetup(int currentCandleCount);
+   void              ExecuteOnInitTests();
+   void              ExecuteNewCandleTests(int currentCandleCount);
+   void              ExecuteSetup(int currentCandleCount);
 
                      CUnitTestSuite();
-                    ~CUnitTestSuite();
   };
 
 
 //+------------------------------------------------------------------+
-//|                                                                  |
+//| Constructor                                                      |
 //+------------------------------------------------------------------+
 CUnitTestSuite::CUnitTestSuite()
   {
@@ -64,14 +63,7 @@ CUnitTestSuite::CUnitTestSuite()
   }
 
 //+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
-CUnitTestSuite::~CUnitTestSuite()
-  {
-  }
-
-//+------------------------------------------------------------------+
-//|                                                                  |
+//| Method to display test results                                   |
 //+------------------------------------------------------------------+
 void CUnitTestSuite::DisplayResults()
   {
@@ -111,11 +103,6 @@ void CUnitTestSuite::DisplayResults()
 
 //+------------------------------------------------------------------+
 //| Add an asserts list to the collection of unit test asserts
-//| @param ut The unit test to add
-//+------------------------------------------------------------------+
-
-//+------------------------------------------------------------------+
-//|                                                                  |
 //+------------------------------------------------------------------+
 void CUnitTestSuite::AddUnitTestAsserts(CUnitTestAsserts* ut)
   {
@@ -123,7 +110,7 @@ void CUnitTestSuite::AddUnitTestAsserts(CUnitTestAsserts* ut)
   }
 
 //+------------------------------------------------------------------+
-//|                                                                  |
+//| Add a unit test function to the suite, that executes OnInit                          
 //+------------------------------------------------------------------+
 void CUnitTestSuite::AddUnitTestFunction(UnitTest testFunc)
   {
@@ -132,7 +119,8 @@ void CUnitTestSuite::AddUnitTestFunction(UnitTest testFunc)
   }
 
 //+------------------------------------------------------------------+
-//|                                                                  |
+//| Add a unit test function to the suite that executes on open of
+//| specific new candle
 //+------------------------------------------------------------------+
 void CUnitTestSuite::AddUnitTestFunction(int onCandleCount, UnitTest testFunc)
   {
@@ -145,7 +133,8 @@ void CUnitTestSuite::AddUnitTestFunction(int onCandleCount, UnitTest testFunc)
   }
 
 //+------------------------------------------------------------------+
-//|                                                                  |
+//| Add a setup function for a specific test that executes on open
+//| of a specific candle
 //+------------------------------------------------------------------+
 void CUnitTestSuite::AddSetupFunction(int onCandleCount, Setup setup)
   {
@@ -158,9 +147,10 @@ void CUnitTestSuite::AddSetupFunction(int onCandleCount, Setup setup)
   }
 
 //+------------------------------------------------------------------+
-//|                                                                  |
+//| Executes the setup functions defined to run on open of specified
+//| candle
 //+------------------------------------------------------------------+
-void CUnitTestSuite::executeSetup(int currentCandleCount)
+void CUnitTestSuite::ExecuteSetup(int currentCandleCount)
   {
    for(int i = 0; i < ArraySize(m_setupFunc_OnNewCandle); i++)
      {
@@ -175,9 +165,9 @@ void CUnitTestSuite::executeSetup(int currentCandleCount)
   }
 
 //+------------------------------------------------------------------+
-//|                                                                  |
+//| Executes the unit tests of the OnInit phase
 //+------------------------------------------------------------------+
-void CUnitTestSuite::executeOnInitTests(void)
+void CUnitTestSuite::ExecuteOnInitTests(void)
   {
    for(int i = 0; i < ArraySize(m_unitTestFunc_OnInit); i++)
      {
@@ -187,9 +177,10 @@ void CUnitTestSuite::executeOnInitTests(void)
   }
 
 //+------------------------------------------------------------------+
-//|                                                                  |
+//| Executes unit tests that are supposed to run on open of a 
+//| specific candle
 //+------------------------------------------------------------------+
-void CUnitTestSuite::executeOnNewCandleTests(int currentCandleCount)
+void CUnitTestSuite::ExecuteNewCandleTests(int currentCandleCount)
   {
    for(int i = 0; i < ArraySize(m_unitTestFunc_OnNewCandle); i++)
      {
@@ -201,26 +192,27 @@ void CUnitTestSuite::executeOnNewCandleTests(int currentCandleCount)
          m_ExecuteOnCandleCount[i][1] = EXECUTED;
         }
      }
-   if(canFinish(currentCandleCount)&&notEmpty())
-      finishUnitTestCollection();
+   if(CanFinish(currentCandleCount)&&NotEmpty())
+      FinishUnitTestsuite();
   }
 
 //+------------------------------------------------------------------+
-//|                                                                  |
+//| Find out if test suite is empty
 //+------------------------------------------------------------------+
-bool CUnitTestSuite::notEmpty()
+bool CUnitTestSuite::NotEmpty()
   {
    return ArraySize(m_unitTestFunc_OnNewCandle)>0;
   }
 
 //+------------------------------------------------------------------+
-//|                                                                  |
+//| Find out if there are tests left for candles after current
+//| candle count. If no tests are pending, suite can finish.
 //+------------------------------------------------------------------+
-bool CUnitTestSuite::canFinish(int currentCandleCount)
+bool CUnitTestSuite::CanFinish(int currentCandleCount)
   {
    for(int i = 0; i<ArraySize(m_unitTestFunc_OnNewCandle); i++)
      {
-      TEST_EXECUTION_STATUS status = m_ExecuteOnCandleCount[i][1];
+      ENUM_TEST_EXEC_STATE status = m_ExecuteOnCandleCount[i][1];
       if(status == PENDING)
         {
          return false;
@@ -230,9 +222,9 @@ bool CUnitTestSuite::canFinish(int currentCandleCount)
   }
 
 //+------------------------------------------------------------------+
-//|                                                                  |
+//| Finish the test suite and display results
 //+------------------------------------------------------------------+
-void CUnitTestSuite::finishUnitTestCollection()
+void CUnitTestSuite::FinishUnitTestsuite()
   {
    Print(" --- Unit Tests end -------------------------------------");
    DisplayResults();
