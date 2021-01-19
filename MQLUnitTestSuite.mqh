@@ -36,7 +36,8 @@ private:
    int               m_ExecuteOnCandleCount[][2]; // holds canlde count on which to execute test and execution status
    Setup             m_setupFunc_OnNewCandle[];
    int               m_SetupExecuteOnCandleCount[][2]; // holds canlde count on which to setup function and execution status
-
+   bool              m_onInitTestsExecuted;
+   
    void              DisplayResults();
    bool              CanFinish(int currentCandleCount);
    void              FinishUnitTestsuite();
@@ -169,11 +170,14 @@ void CUnitTestSuite::ExecuteSetup(int currentCandleCount)
 //+------------------------------------------------------------------+
 void CUnitTestSuite::ExecuteOnInitTests(void)
   {
-   for(int i = 0; i < ArraySize(m_unitTestFunc_OnInit); i++)
-     {
-      UnitTest test = m_unitTestFunc_OnInit[i];
-      m_unitTestsAssertList.Add(test());
-     }
+   if (!m_onInitTestsExecuted) {
+      for(int i = 0; i < ArraySize(m_unitTestFunc_OnInit); i++)
+        {
+         UnitTest test = m_unitTestFunc_OnInit[i];
+         m_unitTestsAssertList.Add(test());
+      }
+      m_onInitTestsExecuted = true;
+   }
   }
 
 //+------------------------------------------------------------------+

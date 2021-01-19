@@ -40,6 +40,7 @@ void OnTick()
   {
 
    IncremetCandleCounter();
+   m_testSuite.ExecuteOnInitTests();
    m_testSuite.ExecuteSetup(candleCounter);
    m_testSuite.ExecuteNewCandleTests(candleCounter);
 

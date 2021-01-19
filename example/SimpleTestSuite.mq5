@@ -8,6 +8,8 @@
 
 #include <MqlUnit/MQLUnitTestLibrary.mqh>
 
+int m_movingAverageHandle;
+
 //+------------------------------------------------------------------+
 //| Simple test example on moving average indicator
 //+------------------------------------------------------------------+
@@ -25,7 +27,7 @@ CUnitTestSuite* ComposeTestsuite()
 void Test_Indicators_copyBuffer_setup()
   {
 // initialize indicator
-   int handle=iMA(_Symbol, PERIOD_CURRENT,10,0,MODE_SMA,PRICE_CLOSE);
+   m_movingAverageHandle=iMA(_Symbol, PERIOD_CURRENT,10,0,MODE_SMA,PRICE_CLOSE);
   }
 
 //+------------------------------------------------------------------+
@@ -35,9 +37,8 @@ CUnitTestAsserts* Test_Indicators_copyBuffer()
   {
    CUnitTestAsserts* ut = new CUnitTestAsserts("Test_Indicators_copyBuffer");
    double movingAverageData[];
-   int handle=iMA(_Symbol, PERIOD_CURRENT,10,0,MODE_SMA,PRICE_CLOSE);
-   CopyBuffer(handle,0,1,10,movingAverageData);
-// check if data is copied to local array
+   CopyBuffer(m_movingAverageHandle,0,1,10,movingAverageData);
+   // check if data is copied to local array
    ut.IsTrue(__FILE__, __LINE__, movingAverageData[0] > 0);
    return ut;
   }

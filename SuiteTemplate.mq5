@@ -6,7 +6,7 @@
 #property copyright "Copyright 2021, Niklas Schlimm"
 #property version   "1.00"
 
-#include <MqlUnit/MQLUnitTestLibrary.mqh>
+#include "MQLUnitTestLibrary.mqh"
 // include the class under test
 
 // add local test state, e.g. object of class under test
