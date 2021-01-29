@@ -16,6 +16,7 @@
 
 datetime candleOpenTime;
 int candleCounter = 0;
+bool tickTestCase = false;
 
 CUnitTestSuite* m_testSuite;
 
@@ -30,6 +31,7 @@ void IncremetCandleCounter()
       //Print("new candle at: " + candleOpenTimeCheck);
       candleOpenTime = candleOpenTimeCheck;
       candleCounter++;
+      Print("### Candle count: " + IntegerToString(candleCounter));
      }
   }
 
@@ -43,10 +45,8 @@ void OnTick()
    m_testSuite.ExecuteOnInitTests();
    m_testSuite.ExecuteSetup(candleCounter);
    m_testSuite.ExecuteNewCandleTests(candleCounter);
+   m_testSuite.ExecuteTeardown(candleCounter);
 
   }
 
-void OnInit() {
-   m_testSuite = ComposeTestsuite();
-}
 //+------------------------------------------------------------------+

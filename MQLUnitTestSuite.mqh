@@ -22,6 +22,7 @@ enum ENUM_TEST_EXEC_STATE
 //+------------------------------------------------------------------+
 typedef CUnitTestAsserts*(*UnitTest)();
 typedef void(*Setup)();
+typedef void(*TearDown)();
 
 //+------------------------------------------------------------------+
 //| Suite of unit tests
@@ -36,6 +37,8 @@ private:
    int               m_ExecuteOnCandleCount[][2]; // holds canlde count on which to execute test and execution status
    Setup             m_setupFunc_OnNewCandle[];
    int               m_SetupExecuteOnCandleCount[][2]; // holds canlde count on which to setup function and execution status
+   TearDown          m_tearDownFunc_OnNewCandle[];
+   int               m_TearDownExecuteOnCandleCount[][2]; // holds canlde count on which to teardown function and execution status
    bool              m_onInitTestsExecuted;
    
    void              DisplayResults();
@@ -46,11 +49,15 @@ public:
    void              AddUnitTestAsserts(CUnitTestAsserts* ut); // result of old school unit test function
    void              AddUnitTestFunction(UnitTest testFunc); // new school test added
    void              AddUnitTestFunction(int onCandleCount, UnitTest testFunc); // new school add on tick test
+   void              AddUnitTestFunction(int onCandleCountA, int onCandleCountB, UnitTest testFunc); // add test in a row of candles
    void              AddSetupFunction(int onCandleCount, Setup setup); // new school on tick test with setup
+   void              AddTearDownFunction(int onCandleCount, TearDown tearDown);
+   void              AddTearDownFunction(int onCandleCountA, int onCandleCountB, TearDown tearDownFunc);
    void              ExecuteOnInitTests();
    void              ExecuteNewCandleTests(int currentCandleCount);
    void              ExecuteSetup(int currentCandleCount);
-
+   void              ExecuteTeardown(int currentCandleCount);
+   void              AddSetupFunction(int onCandleCountA, int onCandleCountB, Setup setupFunc);
                      CUnitTestSuite();
   };
 
@@ -73,14 +80,16 @@ void CUnitTestSuite::DisplayResults()
    int countOfAsserts = m_unitTestsAssertList.Total();
    int total;
    string summary;
-
+   bool summaryState = true;
+   
    for(int i = 0; i < countOfAsserts; i++)  // For all unit tests
      {
       total = asserts.TotalFailedTests();
 
       if(total!=0)  // If there is a failed test
         {
-         summary += "F ";
+         summaryState = false;
+         summary += IntegerToString(i+1) + "F ";
          Print(asserts.GetTestName()+" failed");
 
          for(int j = 0; j < total; j++)
@@ -91,7 +100,7 @@ void CUnitTestSuite::DisplayResults()
         }
       else
         {
-         summary += "OK ";
+         summary += " OK ";
          Print(asserts.GetTestName()+" OK");
         }
 
@@ -100,6 +109,7 @@ void CUnitTestSuite::DisplayResults()
 
    Print(" --------------------------------------------------------");
    Print(summary);
+   Print("Test state: " + (summaryState ? "GREEN" : "RED"));
   }
 
 //+------------------------------------------------------------------+
@@ -134,6 +144,47 @@ void CUnitTestSuite::AddUnitTestFunction(int onCandleCount, UnitTest testFunc)
   }
 
 //+------------------------------------------------------------------+
+//| Add unit test functions from index a->b to the suite that executes 
+//| on open of specific new candle, before the test cases
+//+------------------------------------------------------------------+
+void CUnitTestSuite::AddUnitTestFunction(int onCandleCountA, int onCandleCountB, UnitTest testFunc)
+  {
+     for(int i = onCandleCountA; i <= onCandleCountB; i++) {
+        AddUnitTestFunction(i,testFunc);
+     }
+  }
+
+void CUnitTestSuite::AddSetupFunction(int onCandleCountA, int onCandleCountB, Setup setupFunc)
+  {
+     for(int i = onCandleCountA; i <= onCandleCountB; i++) {
+        AddSetupFunction(i,setupFunc);
+     }
+  }
+
+
+//+------------------------------------------------------------------+
+//| Add a teardown function for a specific test that executes on open
+//| of a specific candle, after the testcases on that candle
+//+------------------------------------------------------------------+
+void CUnitTestSuite::AddTearDownFunction(int onCandleCount, TearDown tearDown)
+  {
+   ArrayResize(m_tearDownFunc_OnNewCandle,ArraySize(m_tearDownFunc_OnNewCandle)+1);
+   ArrayResize(m_TearDownExecuteOnCandleCount,ArrayRange(m_TearDownExecuteOnCandleCount,0)+1);
+   int index = ArraySize(m_tearDownFunc_OnNewCandle)-1;
+   m_tearDownFunc_OnNewCandle[index] = tearDown;
+   m_TearDownExecuteOnCandleCount[index][0] = onCandleCount;
+   m_TearDownExecuteOnCandleCount[index][1] = PENDING;
+  }
+
+void CUnitTestSuite::AddTearDownFunction(int onCandleCountA, int onCandleCountB, TearDown tearDownFunc)
+  {
+     for(int i = onCandleCountA; i <= onCandleCountB; i++) {
+        AddTearDownFunction(i,tearDownFunc);
+     }
+  }
+
+
+//+------------------------------------------------------------------+
 //| Add a setup function for a specific test that executes on open
 //| of a specific candle
 //+------------------------------------------------------------------+
@@ -146,6 +197,7 @@ void CUnitTestSuite::AddSetupFunction(int onCandleCount, Setup setup)
    m_SetupExecuteOnCandleCount[index][0] = onCandleCount;
    m_SetupExecuteOnCandleCount[index][1] = PENDING;
   }
+
 
 //+------------------------------------------------------------------+
 //| Executes the setup functions defined to run on open of specified
@@ -161,6 +213,24 @@ void CUnitTestSuite::ExecuteSetup(int currentCandleCount)
          Setup setup = m_setupFunc_OnNewCandle[i];
          setup();
          m_SetupExecuteOnCandleCount[i][1] = EXECUTED;
+        }
+     }
+  }
+
+//+------------------------------------------------------------------+
+//| Executes the setup functions defined to run on open of specified
+//| candle
+//+------------------------------------------------------------------+
+void CUnitTestSuite::ExecuteTeardown(int currentCandleCount)
+  {
+   for(int i = 0; i < ArraySize(m_tearDownFunc_OnNewCandle); i++)
+     {
+      if(currentCandleCount == m_TearDownExecuteOnCandleCount[i][0]
+         && m_TearDownExecuteOnCandleCount[i][1] == PENDING)
+        {
+         TearDown tearDown = m_tearDownFunc_OnNewCandle[i];
+         tearDown();
+         m_TearDownExecuteOnCandleCount[i][1] = EXECUTED;
         }
      }
   }
