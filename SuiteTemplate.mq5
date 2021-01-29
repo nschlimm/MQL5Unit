@@ -11,6 +11,10 @@
 
 // add local test state, e.g. object of class under test
 
+void OnInit() {
+   m_testSuite = ComposeTestsuite();
+};
+
 //+------------------------------------------------------------------+
 //| Standard testsuite method implemented by user                    |
 //+------------------------------------------------------------------+

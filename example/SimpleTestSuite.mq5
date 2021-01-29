@@ -10,6 +10,10 @@
 
 int m_movingAverageHandle;
 
+void OnInit() {
+   m_testSuite = ComposeTestsuite();
+};
+
 //+------------------------------------------------------------------+
 //| Simple test example on moving average indicator
 //+------------------------------------------------------------------+
