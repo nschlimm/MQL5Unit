@@ -6,7 +6,7 @@
 #property copyright "Copyright 2021, Niklas Schlimm"
 #property version   "1.00"
 
-#include <MqlUnit/MQLUnitTestLibrary.mqh>
+#include "MQLUnitTestLibrary.mqh"
 
 int m_movingAverageHandle;
 
@@ -22,6 +22,7 @@ CUnitTestSuite* ComposeTestsuite()
    CUnitTestSuite* testSuite = new CUnitTestSuite();
    testSuite.AddSetupFunction(1, Test_Indicators_copyBuffer_setup);
    testSuite.AddUnitTestFunction(2,Test_Indicators_copyBuffer);
+   testSuite.AddTearDownFunction(3, Test_Indicators_copyBuffer_tearDown);
    return testSuite;
   }
 
@@ -30,8 +31,17 @@ CUnitTestSuite* ComposeTestsuite()
 //+------------------------------------------------------------------+
 void Test_Indicators_copyBuffer_setup()
   {
-// initialize indicator
+   // initialize indicator
    m_movingAverageHandle=iMA(_Symbol, PERIOD_CURRENT,10,0,MODE_SMA,PRICE_CLOSE);
+  }
+
+//+------------------------------------------------------------------+
+//| Tear down and remove indicator
+//+------------------------------------------------------------------+
+void Test_Indicators_copyBuffer_tearDown()
+  {
+   // remove indicator
+   m_movingAverageHandle=NULL;
   }
 
 //+------------------------------------------------------------------+
