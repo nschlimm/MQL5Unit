@@ -90,7 +90,7 @@ void CUnitTestSuite::DisplayResults()
         {
          summaryState = false;
          summary += IntegerToString(i+1) + "F ";
-         Print(asserts.GetTestName()+" failed");
+         Print(asserts.GetTestName()+" failed (candle count: " + IntegerToString(asserts.GetCandleCount())+")");
 
          for(int j = 0; j < total; j++)
            {
@@ -262,7 +262,9 @@ void CUnitTestSuite::ExecuteNewCandleTests(int currentCandleCount)
          && m_ExecuteOnCandleCount[i][1] == PENDING)
         {
          UnitTest test = m_unitTestFunc_OnNewCandle[i];
-         m_unitTestsAssertList.Add(test());
+         CUnitTestAsserts* assert = test();
+         assert.SetCandleCount(currentCandleCount);
+         m_unitTestsAssertList.Add(assert);
          m_ExecuteOnCandleCount[i][1] = EXECUTED;
         }
      }
@@ -311,5 +313,7 @@ void CUnitTestSuite::FinishUnitTestsuite()
    ArrayFree(m_setupFunc_OnNewCandle);
    ArrayFree(m_SetupExecuteOnCandleCount);
 
+   ExpertRemove();
+   
   }
 //+------------------------------------------------------------------+

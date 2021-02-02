@@ -82,6 +82,7 @@ class CUnitTestAsserts: public CObject
 private:
    string            m_name;
    CList             m_failedAssertsList;
+   int               m_candleCount;
 
    void              AddFailedAssert(string file, int line, string message);
 
@@ -91,6 +92,8 @@ public:
 
    // asserts
    bool              IsTrue(string file, int line, bool result);
+   bool              IsTrue(string file, int line, int result, int expect);
+   bool              IsTrue(string file, int line, string result, string expect);
    bool              IsFalse(string file, int line, bool result);
    bool              IsEquals(string file, int line, string stringA, string stringB);
    bool              IsEquals(string file, int line, int nbrA, int nbrB);
@@ -101,6 +104,17 @@ public:
    // Access to failed asserta
    CFailedAssert*    GetFailedAssert(int position);
    int               TotalFailedTests();
+   
+   // candle executed
+   void              SetCandleCount(int p_candleCount)
+                     {
+                        m_candleCount = p_candleCount;
+                     };
+
+   int              GetCandleCount()
+                     {
+                        return m_candleCount;
+                     };
 
    // test name
    string            GetTestName();
@@ -142,6 +156,36 @@ bool CUnitTestAsserts::IsTrue(string file, int line, bool result)
    if(result!=true)
      {
       this.AddFailedAssert(file, line, "isTrue(False)");
+      return false;
+     }
+   else
+      return true;
+  }
+
+//+------------------------------------------------------------------+
+//| Assert verifying if the argument result is as expected
+//| @param result Boolean to compare
+//+------------------------------------------------------------------+
+bool CUnitTestAsserts::IsTrue(string file, int line, int result, int expect)
+  {
+   if(result!=expect)
+     {
+      this.AddFailedAssert(file, line, "expected: "+IntegerToString(expect) + " but was " + IntegerToString(result));
+      return false;
+     }
+   else
+      return true;
+  }
+
+//+------------------------------------------------------------------+
+//| Assert verifying if the argument result is as expected
+//| @param result Boolean to compare
+//+------------------------------------------------------------------+
+bool CUnitTestAsserts::IsTrue(string file, int line, string result, string expect)
+  {
+   if(result!=expect)
+     {
+      this.AddFailedAssert(file, line, "expected: '"+ expect + "' but was '" + result + "'");
       return false;
      }
    else
