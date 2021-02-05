@@ -17,6 +17,7 @@
 datetime candleOpenTime;
 int candleCounter = 0;
 bool tickTestCase = false;
+bool finished = false;
 
 CUnitTestSuite* m_testSuite;
 
@@ -32,6 +33,14 @@ void IncremetCandleCounter()
       candleOpenTime = candleOpenTimeCheck;
       candleCounter++;
       Print("### Candle count: " + IntegerToString(candleCounter));
+
+      if (finished) ExpertRemove();
+      
+      if(m_testSuite.CanFinish(candleCounter)&&m_testSuite.NotEmpty()) {
+         m_testSuite.FinishUnitTestsuite();
+         finished = true;
+      };
+      
      }
   }
 

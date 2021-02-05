@@ -10,6 +10,8 @@
 #include <Object.mqh>
 #include <Arrays\List.mqh>
 
+string comment;
+
 //+------------------------------------------------------------------+
 //| Internal class representing failed test assert
 //+------------------------------------------------------------------+
@@ -94,6 +96,7 @@ public:
    bool              IsTrue(string file, int line, bool result);
    bool              IsTrue(string file, int line, int result, int expect);
    bool              IsTrue(string file, int line, string result, string expect);
+   bool              IsTrue(string file, int line, double result, double expect);
    bool              IsFalse(string file, int line, bool result);
    bool              IsEquals(string file, int line, string stringA, string stringB);
    bool              IsEquals(string file, int line, int nbrA, int nbrB);
@@ -145,6 +148,8 @@ void CUnitTestAsserts::AddFailedAssert(string file, int line, string message)
    CFailedAssert *newFailedAssert = new CFailedAssert(file,line);
    newFailedAssert.SetResult(message);
    m_failedAssertsList.Add(newFailedAssert);
+   StringConcatenate(comment, comment, m_name, ":", line, ":", message, "\n");
+   Comment(comment);
   }
 
 //+------------------------------------------------------------------+
@@ -186,6 +191,21 @@ bool CUnitTestAsserts::IsTrue(string file, int line, string result, string expec
    if(result!=expect)
      {
       this.AddFailedAssert(file, line, "expected: '"+ expect + "' but was '" + result + "'");
+      return false;
+     }
+   else
+      return true;
+  }
+
+//+------------------------------------------------------------------+
+//| Assert verifying if the argument result is as expected
+//| @param result Boolean to compare
+//+------------------------------------------------------------------+
+bool CUnitTestAsserts::IsTrue(string file, int line, double result, double expect)
+  {
+   if(DoubleToString(result, 8)!=DoubleToString(expect, 8))
+     {
+      this.AddFailedAssert(file, line, "expected: '"+ DoubleToString(expect, 8) + "' but was '" + DoubleToString(result, 8) + "'");
       return false;
      }
    else

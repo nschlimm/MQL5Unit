@@ -42,10 +42,10 @@ private:
    bool              m_onInitTestsExecuted;
    
    void              DisplayResults();
+public:
+   bool              NotEmpty();
    bool              CanFinish(int currentCandleCount);
    void              FinishUnitTestsuite();
-   bool              NotEmpty();
-public:
    void              AddUnitTestAsserts(CUnitTestAsserts* ut); // result of old school unit test function
    void              AddUnitTestFunction(UnitTest testFunc); // new school test added
    void              AddUnitTestFunction(int onCandleCount, UnitTest testFunc); // new school add on tick test
@@ -91,7 +91,6 @@ void CUnitTestSuite::DisplayResults()
          summaryState = false;
          summary += IntegerToString(i+1) + "F ";
          Print(asserts.GetTestName()+" failed (candle count: " + IntegerToString(asserts.GetCandleCount())+")");
-
          for(int j = 0; j < total; j++)
            {
             failedAssert = asserts.GetFailedAssert(j);
@@ -110,6 +109,11 @@ void CUnitTestSuite::DisplayResults()
    Print(" --------------------------------------------------------");
    Print(summary);
    Print("Test state: " + (summaryState ? "GREEN" : "RED"));
+   if (summaryState)
+      ChartSetInteger( 0, CHART_COLOR_BACKGROUND, clrMediumSeaGreen);
+   if (!summaryState)
+      ChartSetInteger( 0, CHART_COLOR_BACKGROUND, clrTomato);
+   ChartRedraw();
   }
 
 //+------------------------------------------------------------------+
@@ -268,8 +272,6 @@ void CUnitTestSuite::ExecuteNewCandleTests(int currentCandleCount)
          m_ExecuteOnCandleCount[i][1] = EXECUTED;
         }
      }
-   if(CanFinish(currentCandleCount)&&NotEmpty())
-      FinishUnitTestsuite();
   }
 
 //+------------------------------------------------------------------+
@@ -313,7 +315,5 @@ void CUnitTestSuite::FinishUnitTestsuite()
    ArrayFree(m_setupFunc_OnNewCandle);
    ArrayFree(m_SetupExecuteOnCandleCount);
 
-   ExpertRemove();
-   
   }
 //+------------------------------------------------------------------+
