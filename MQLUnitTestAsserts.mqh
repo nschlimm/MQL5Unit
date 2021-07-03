@@ -10,6 +10,14 @@
 #include <Object.mqh>
 #include <Arrays\List.mqh>
 
+enum ENUM_MQLUNIT_TRADEACTION
+{
+   MQLUNIT_TRADEACTION_BUY = 1,
+   MQLUNIT_TRADEACTION_SELL = 2,
+   MQLUNIT_TRADEACTION_CLOSEBUY = 3,
+   MQLUNIT_TRADEACTION_CLOSESELL = 4   
+};
+
 string comment;
 
 //+------------------------------------------------------------------+
@@ -85,7 +93,8 @@ private:
    string            m_name;
    CList             m_failedAssertsList;
    int               m_candleCount;
-
+   ENUM_MQLUNIT_TRADEACTION   m_tradeActionType;
+   
    void              AddFailedAssert(string file, int line, string message);
 
 public:
@@ -121,6 +130,8 @@ public:
 
    // test name
    string            GetTestName();
+   void setTradeActionType(ENUM_MQLUNIT_TRADEACTION p_tradeActionType){m_tradeActionType=p_tradeActionType;}
+   ENUM_MQLUNIT_TRADEACTION getTradeActionType(){return m_tradeActionType;}
   };
 
 //+------------------------------------------------------------------+
