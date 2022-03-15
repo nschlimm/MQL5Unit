@@ -40,7 +40,7 @@ private:
    TearDown          m_tearDownFunc_OnNewCandle[];
    int               m_TearDownExecuteOnCandleCount[][2]; // holds canlde count on which to teardown function and execution status
    bool              m_onInitTestsExecuted;
-
+   
    void              DisplayResults();
 public:
    bool              NotEmpty();
@@ -81,7 +81,7 @@ void CUnitTestSuite::DisplayResults()
    int total;
    string summary;
    bool summaryState = true;
-
+   
    for(int i = 0; i < countOfAsserts; i++)  // For all unit tests
      {
       total = asserts.TotalFailedTests();
@@ -140,28 +140,16 @@ void CUnitTestSuite::DisplayResults()
             lastTestName=currentName;
             continue;
          }
-         PrintFormat("testSuite.AddUnitTestFunction(%i, %i, %s);",
-          startCount,
-          (asserts.GetCandleCount()-1),
-          lastTestName
-         );
+         Print("testSuite.AddUnitTestFunction("+startCount+", "+(asserts.GetCandleCount()-1)+", "+lastTestName+");");
          startCount = asserts.GetCandleCount();
          lastTestName=currentName;
       }
-      if (asserts.TotalFailedTests()>0) {
-         Print("testSuite.AddUnitTestFunction(%i, %i, %s); // Failed",
-          asserts.GetCandleCount(),
-          asserts.GetCandleCount(),
-          currentName
-         );
+      if (asserts.TotalFailedTests()>0) { 
+         Print("testSuite.AddUnitTestFunction("+asserts.GetCandleCount()+", "+asserts.GetCandleCount()+", "+currentName+"); // Failed");
          lastFailingCandlecount = asserts.GetCandleCount();
-      }
+      } 
       if (i==(countOfAsserts-1)) {
-        Print("testSuite.AddUnitTestFunction(%i, %i, %s);",
-          startCount,
-          asserts.GetCandleCount(),
-          lastTestName
-        );
+        Print("testSuite.AddUnitTestFunction("+startCount+", "+((asserts.GetCandleCount()))+", "+lastTestName+");");
       }
       asserts = m_unitTestsAssertList.GetNextNode();
      }
@@ -185,40 +173,20 @@ void CUnitTestSuite::DisplayResults()
      {
       currentName = asserts.GetTestName();
       if (asserts.TotalFailedTests()>0) {
-         PrintFormat("testSuite.AddUnitTestFunction(%i, %i, %s);",
-          startCount,
-          (asserts.GetCandleCount()-1),
-          lastTestName
-         );
+         Print("testSuite.AddUnitTestFunction("+startCount+", "+(asserts.GetCandleCount()-1)+", "+lastTestName+");");
          if (asserts.getTradeActionType()==MQLUNIT_TRADEACTION_BUY)
-            PrintFormat("testSuite.AddUnitTestFunction(%i, %i, Test_DoTrading_ShouldPlaceBuyOrder);",
-              asserts.GetCandleCount(),
-              asserts.GetCandleCount()
-            );
+            Print("testSuite.AddUnitTestFunction("+asserts.GetCandleCount()+", "+asserts.GetCandleCount()+", Test_DoTrading_ShouldPlaceBuyOrder);");
          if (asserts.getTradeActionType()==MQLUNIT_TRADEACTION_SELL)
-            PrintFormat("testSuite.AddUnitTestFunction(%i, %i, Test_DoTrading_ShouldPlaceSellOrder);",
-              asserts.GetCandleCount(),
-              asserts.GetCandleCount()
-            );
+            Print("testSuite.AddUnitTestFunction("+asserts.GetCandleCount()+", "+asserts.GetCandleCount()+", Test_DoTrading_ShouldPlaceSellOrder);");
          if (asserts.getTradeActionType()==MQLUNIT_TRADEACTION_CLOSEBUY)
-            PrintFormat("testSuite.AddUnitTestFunction(%i, %i, Test_DoTrading_ShouldCloseBuyOrder);",
-              asserts.GetCandleCount(),
-              asserts.GetCandleCount()
-            );
+            Print("testSuite.AddUnitTestFunction("+asserts.GetCandleCount()+", "+asserts.GetCandleCount()+", Test_DoTrading_ShouldCloseBuyOrder);");
          if (asserts.getTradeActionType()==MQLUNIT_TRADEACTION_CLOSESELL)
-            PrintFormat("testSuite.AddUnitTestFunction(%i, %i, Test_DoTrading_ShouldCloseSellOrder);",
-              asserts.GetCandleCount(),
-              asserts.GetCandleCount()
-            );
+            Print("testSuite.AddUnitTestFunction("+asserts.GetCandleCount()+", "+asserts.GetCandleCount()+", Test_DoTrading_ShouldCloseSellOrder);");
          startCount = asserts.GetCandleCount()+1;
          lastTestName=currentName;
       }
       if (i==(countOfAsserts-1)) {
-        PrintFormat("testSuite.AddUnitTestFunction(%i, %i, %s);",
-          startCount,
-          asserts.GetCandleCount(),
-          lastTestName
-        );
+        Print("testSuite.AddUnitTestFunction("+startCount+", "+((asserts.GetCandleCount()))+", "+lastTestName+");");
       }
       asserts = m_unitTestsAssertList.GetNextNode();
      }
@@ -233,7 +201,7 @@ void CUnitTestSuite::AddUnitTestAsserts(CUnitTestAsserts* ut)
   }
 
 //+------------------------------------------------------------------+
-//| Add a unit test function to the suite, that executes OnInit
+//| Add a unit test function to the suite, that executes OnInit                          
 //+------------------------------------------------------------------+
 void CUnitTestSuite::AddUnitTestFunction(UnitTest testFunc)
   {
@@ -256,7 +224,7 @@ void CUnitTestSuite::AddUnitTestFunction(int onCandleCount, UnitTest testFunc)
   }
 
 //+------------------------------------------------------------------+
-//| Add unit test functions from index a->b to the suite that executes
+//| Add unit test functions from index a->b to the suite that executes 
 //| on open of specific new candle, before the test cases
 //+------------------------------------------------------------------+
 void CUnitTestSuite::AddUnitTestFunction(int onCandleCountA, int onCandleCountB, UnitTest testFunc)
@@ -363,7 +331,7 @@ void CUnitTestSuite::ExecuteOnInitTests(void)
   }
 
 //+------------------------------------------------------------------+
-//| Executes unit tests that are supposed to run on open of a
+//| Executes unit tests that are supposed to run on open of a 
 //| specific candle
 //+------------------------------------------------------------------+
 void CUnitTestSuite::ExecuteNewCandleTests(int currentCandleCount)
